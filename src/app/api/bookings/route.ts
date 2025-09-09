@@ -1,9 +1,9 @@
 // app/api/bookings/route.ts
-import connectDB from "../../lib/db";
-import Event from "../../models/Event";
-import Booking from "../../models/Booking";
+import connectDB from "../../../lib/db";
+import Event from "../../../models/Event";
+import Booking from "../../../models/Booking";
 import { z } from "zod";
-import { requireUser } from "../../lib/requireAuth";
+import { requireUser } from "../../../lib/requireAuth";
 
 const BookSchema = z.object({
   eventId: z.string(),

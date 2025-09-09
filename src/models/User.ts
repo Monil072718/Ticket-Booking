@@ -1,4 +1,4 @@
-// models/User.ts
+// src/models/User.ts
 import mongoose, { Document } from "mongoose";
 
 export interface IUser extends Document {
@@ -20,4 +20,5 @@ const UserSchema = new mongoose.Schema<IUser>(
   { timestamps: true }
 );
 
+// reuse model if already compiled (hot reload friendliness)
 export default mongoose.models.User || mongoose.model<IUser>("User", UserSchema);

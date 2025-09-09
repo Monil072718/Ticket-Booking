@@ -1,6 +1,6 @@
 // app/events/[slug]/page.tsx
-import connectDB from "../../lib/db";
-import Event from "../../models/Event";
+import connectDB from "../../../lib/db";
+import Event from "../../../models/Event";
 
 type Props = { params: { slug: string } };
 

@@ -1,8 +1,8 @@
 // app/api/events/route.ts
-import connectDB from "../../lib/db";
-import Event from "../../models/Event";
+import connectDB from "../../../lib/db";
+import Event from "../../../models/Event";
 import { z } from "zod";
-import { requireAdmin } from "../../lib/requireAuth";
+import { requireAdmin } from "../../../lib/requireAuth";
 
 const CreateEventSchema = z.object({
   title: z.string(),

@@ -1,7 +1,7 @@
 // app/api/events/[id]/route.ts
-import connectDB from "../../../lib/db";
-import Event from "../../../models/Event";
-import { requireAdmin } from "../../../lib/requireAuth";
+import connectDB from "../../../../lib/db";
+import Event from "../../../../models/Event";
+import { requireAdmin } from "../../../../lib/requireAuth";
 
 export async function GET(req: Request, { params }: { params: { id: string } }) {
   await connectDB();
