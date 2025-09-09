@@ -1,31 +1,54 @@
-// app/events/[slug]/page.tsx
-import connectDB from "../../../lib/db";
-import Event from "../../../models/Event";
+"use client";
 
-type Props = { params: { slug: string } };
+import { useState } from "react";
 
-export default async function EventPage({ params }: Props) {
-  await connectDB();
+export default function BookEvent({ event }: { event: any }) {
+  const [seats, setSeats] = useState(1);
+  const [message, setMessage] = useState("");
 
-  const ev = await Event.findOne({ slug: params.slug }).lean();
+  const handleBooking = async () => {
+    try {
+      const res = await fetch("/api/bookings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: "USER123", // 🔥 Replace with logged-in user
+          eventId: event._id,
+          seats,
+        }),
+      });
 
-  if (!ev) return <div>Not found</div>;
-
-  // Convert MongoDB document into serializable object
-  const event = {
-    ...ev,
-    _id: ev._id.toString(),
-    date: ev.date ? new Date(ev.date).toISOString() : null,
+      const data = await res.json();
+      if (data.success) {
+        setMessage("Booking confirmed!");
+      } else {
+        setMessage(data.error || "Booking failed");
+      }
+    } catch (err) {
+      setMessage("Something went wrong");
+    }
   };
 
   return (
-    <main className="max-w-3xl mx-auto p-6">
-      <h1 className="text-3xl font-bold">{event.title}</h1>
-      <p className="mt-2">{event.description}</p>
-      <p className="mt-2">Date: {event.date ? new Date(event.date).toLocaleString() : "TBA"}</p>
-      <p className="mt-2">Venue: {event.venue}</p>
-      <p className="mt-2">Available Seats: {event.availableSeats}</p>
-      {/* Later: add booking button */}
-    </main>
+    <div className="mt-6">
+      <label>
+        Seats:
+        <input
+          type="number"
+          min="1"
+          max={event.availableSeats}
+          value={seats}
+          onChange={(e) => setSeats(Number(e.target.value))}
+          className="border p-2 ml-2"
+        />
+      </label>
+      <button
+        onClick={handleBooking}
+        className="ml-4 bg-blue-600 text-white px-4 py-2 rounded"
+      >
+        Book Now
+      </button>
+      {message && <p className="mt-2 text-green-600">{message}</p>}
+    </div>
   );
 }

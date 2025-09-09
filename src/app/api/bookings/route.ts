@@ -1,45 +1,50 @@
-// app/api/bookings/route.ts
+import { NextRequest, NextResponse } from "next/server";
 import connectDB from "../../../lib/db";
 import Event from "../../../models/Event";
 import Booking from "../../../models/Booking";
-import { z } from "zod";
-import { requireUser } from "../../../lib/requireAuth";
 
-const BookSchema = z.object({
-  eventId: z.string(),
-  seats: z.number().min(1),
-});
-
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
-    const user = await requireUser(req);
-    const body = await req.json();
-    const parsed = BookSchema.parse(body);
-
     await connectDB();
+    const { userId, eventId, seats } = await req.json();
 
-    // attempt atomic decrement of availableSeats
-    const ev = await Event.findOneAndUpdate(
-      { _id: parsed.eventId, availableSeats: { $gte: parsed.seats } },
-      { $inc: { availableSeats: -parsed.seats } },
+    if (!userId || !eventId || !seats) {
+      return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+    }
+
+    // Atomic update: decrement seats only if enough available
+    const updatedEvent = await Event.findOneAndUpdate(
+      { _id: eventId, availableSeats: { $gte: seats } },
+      { $inc: { availableSeats: -seats } },
       { new: true }
     );
 
-    if (!ev) {
-      return new Response(JSON.stringify({ error: "Not enough seats" }), { status: 400 });
+    if (!updatedEvent) {
+      return NextResponse.json({ error: "Not enough seats available" }, { status: 400 });
     }
 
-    const total = parsed.seats * ev.price;
-    const booking = await Booking.create({
-      user: user._id,
-      event: ev._id,
-      seatsBooked: parsed.seats,
-      totalAmount: total,
-      paymentStatus: "pending", // integrate payment gateway to update to 'paid'
-    });
+    // Create booking
+    const booking = await Booking.create({ userId, eventId, seats });
 
-    return new Response(JSON.stringify(booking), { status: 201 });
-  } catch (err: any) {
-    return new Response(JSON.stringify({ error: err.message || "Unauthorized" }), { status: 401 });
+    return NextResponse.json({ success: true, booking }, { status: 201 });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
+export async function GET(req: NextRequest) {
+  try {
+    await connectDB();
+    const { searchParams } = new URL(req.url);
+    const userId = searchParams.get("userId");
+
+    if (!userId) {
+      return NextResponse.json({ error: "userId is required" }, { status: 400 });
+    }
+
+    const bookings = await Booking.find({ userId }).populate("eventId");
+    return NextResponse.json({ bookings });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
