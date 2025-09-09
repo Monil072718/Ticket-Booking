@@ -1,4 +1,3 @@
-// src/app/api/auth/logout/route.ts
 import { serialize } from "cookie";
 
 export async function POST() {
@@ -7,11 +6,11 @@ export async function POST() {
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
-    maxAge: 0,
+    maxAge: 0, // delete immediately
   });
 
-  return new Response(JSON.stringify({ ok: true }), {
+  return new Response(JSON.stringify({ message: "Logged out" }), {
     status: 200,
-    headers: { "Content-Type": "application/json", "Set-Cookie": cookie },
+    headers: { "Set-Cookie": cookie },
   });
 }

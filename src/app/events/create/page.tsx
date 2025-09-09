@@ -23,16 +23,18 @@ export default function CreateEventPage() {
   useEffect(() => {
     const checkRole = async () => {
       try {
-        const res = await fetch("/api/auth/me"); // we'll create this endpoint later
+        const res = await fetch("/api/auth/me");
         if (!res.ok) {
           router.push("/auth/login");
           return;
         }
         const data = await res.json();
+        
+        // ✅ FIXED: Allow only admins
         if (data.user.role === "admin") {
           setIsAdmin(true);
         } else {
-          router.push("/"); // non-admins go home
+          router.push("/"); // redirect non-admins
         }
       } catch (err) {
         router.push("/auth/login");
