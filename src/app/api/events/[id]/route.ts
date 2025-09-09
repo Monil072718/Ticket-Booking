@@ -1,4 +1,3 @@
-// src/app/api/events/[id]/route.ts
 import connectDB from "../../../../lib/db";
 import Event from "../../../../models/Event";
 import { requireAdmin } from "../../../../lib/requireAuth";

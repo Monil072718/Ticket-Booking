@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import { parse } from "cookie";
 
 const JWT_SECRET = process.env.JWT_SECRET as string;
 
@@ -12,4 +13,11 @@ export function signToken(payload: object) {
 
 export function verifyToken(token: string) {
   return jwt.verify(token, JWT_SECRET);
+}
+
+// 🔥 Add this function back
+export function getTokenFromRequest(req: Request) {
+  const cookieHeader = req.headers.get("cookie") || "";
+  const cookies = parse(cookieHeader);
+  return cookies.token || null;
 }

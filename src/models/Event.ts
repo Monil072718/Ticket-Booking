@@ -1,27 +1,22 @@
-// src/models/Event.ts
-import mongoose, { Document } from "mongoose";
+import mongoose, { Schema, Document, models } from "mongoose";
 
 export interface IEvent extends Document {
   title: string;
   slug: string;
   description?: string;
   date: Date;
-  time?: string;
   venue: string;
   price: number;
   availableSeats: number;
   image?: string;
-  createdAt: Date;
-  updatedAt: Date;
 }
 
-const EventSchema = new mongoose.Schema<IEvent>(
+const EventSchema = new Schema<IEvent>(
   {
     title: { type: String, required: true },
-    slug: { type: String, required: true, unique: true, index: true },
+    slug: { type: String, required: true, unique: true },
     description: String,
     date: { type: Date, required: true },
-    time: String,
     venue: { type: String, required: true },
     price: { type: Number, required: true },
     availableSeats: { type: Number, required: true },
@@ -30,4 +25,5 @@ const EventSchema = new mongoose.Schema<IEvent>(
   { timestamps: true }
 );
 
-export default mongoose.models.Event || mongoose.model<IEvent>("Event", EventSchema);
+export default models.Event || mongoose.model<IEvent>("Event", EventSchema);
+  

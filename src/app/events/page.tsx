@@ -1,9 +1,6 @@
-// src/app/events/page.tsx
 import connectDB from "../../lib/db";
 import Event from "../../models/Event";
 import Link from "next/link";
-
-export const dynamic = "force-dynamic"; // ensure fresh data on each request
 
 export default async function EventsPage() {
   await connectDB();
