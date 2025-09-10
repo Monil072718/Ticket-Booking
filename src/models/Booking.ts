@@ -5,6 +5,8 @@ export interface IBooking extends Document {
   eventId: string;
   seats: number;
   createdAt: Date;
+  city: string;
+  state: string;
 }
 
 const BookingSchema = new Schema<IBooking>(
@@ -12,6 +14,8 @@ const BookingSchema = new Schema<IBooking>(
     userId: { type: String, required: true },
     eventId: { type: String, required: true },
     seats: { type: Number, required: true, min: 1 },
+    city: { type: String, required: true },
+    state: { type: String, required: true },
   },
   { timestamps: true }
 );

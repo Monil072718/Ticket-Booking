@@ -8,9 +8,9 @@ import { requireUser } from "../../../lib/requireAuth";
 export async function POST(req: NextRequest) {
   try {
     const user = await requireUser(req); // ✅ auth required
-    const { eventId, seats } = await req.json();
+    const { eventId, seats, city, state } = await req.json();
 
-    if (!eventId || !seats || seats <= 0) {
+    if (!eventId || !seats || seats <= 0 || !city || !state) {
       return NextResponse.json({ error: "Invalid booking data" }, { status: 400 });
     }
 
@@ -32,6 +32,8 @@ export async function POST(req: NextRequest) {
       user: user._id,
       event: eventId,
       seats,
+      city,
+      state,   // <-- added here
     });
 
     return NextResponse.json({ success: true, booking }, { status: 201 });
@@ -40,6 +42,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: error.message || "Server error" }, { status: 500 });
   }
 }
+
 
 // 🎟️ GET /api/bookings → Get current user's bookings
 export async function GET(req: NextRequest) {
