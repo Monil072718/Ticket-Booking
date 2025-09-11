@@ -1,59 +1,62 @@
 "use client";
-
-import { useState, useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function ResetPasswordPage() {
-  const [password, setPassword] = useState("");
-  const [token, setToken] = useState("");
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const token = searchParams.get("token"); // ✅ get token from URL
 
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const t = urlParams.get("token");
-    if (t) setToken(t);
-  }, []);
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setMessage("");
-    setError("");
-
+    if (password !== confirm) {
+      setError("Passwords do not match");
+      return;
+    }
     try {
       const res = await fetch("/api/auth/reset-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token, password }),
       });
-
       const data = await res.json();
-      if (!res.ok) {
-        setError(data.error);
-        return;
-      }
-      setMessage("✅ Password reset successful. You can now login.");
-    } catch {
-      setError("Something went wrong");
+      if (!res.ok) throw new Error(data.error || "Something went wrong");
+      setSuccess("Password reset successfully! Redirecting to login...");
+      setTimeout(() => router.push("/login"), 2000);
+    } catch (err: any) {
+      setError(err.message);
     }
   };
 
   return (
-    <main className="max-w-md mx-auto p-6">
+    <div className="max-w-md mx-auto mt-10 p-6 border rounded-lg shadow">
       <h1 className="text-2xl font-bold mb-4">Reset Password</h1>
-      <form onSubmit={handleSubmit} className="space-y-4">
+      {error && <p className="text-red-500 mb-2">{error}</p>}
+      {success && <p className="text-green-600 mb-2">{success}</p>}
+      <form onSubmit={handleSubmit}>
         <input
           type="password"
-          placeholder="Enter new password"
-          className="w-full border p-2 rounded"
+          placeholder="New Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          className="w-full p-2 border rounded mb-2"
         />
-        <button className="w-full bg-green-600 text-white py-2 rounded">
+        <input
+          type="password"
+          placeholder="Confirm Password"
+          value={confirm}
+          onChange={(e) => setConfirm(e.target.value)}
+          className="w-full p-2 border rounded mb-4"
+        />
+        <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded">
           Reset Password
         </button>
       </form>
-      {message && <p className="text-green-600 mt-2">{message}</p>}
-      {error && <p className="text-red-600 mt-2">{error}</p>}
-    </main>
+    </div>
   );
 }
