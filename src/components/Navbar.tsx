@@ -3,14 +3,14 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Menu, X } from "lucide-react"; // ✅ icon library (lucide-react)
+import { Menu, X } from "lucide-react";
 
 export default function Navbar() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const router = useRouter();
 
-  // ✅ Check login status from backend
+  // ✅ Check login status
   useEffect(() => {
     const checkAuth = async () => {
       try {
@@ -27,7 +27,7 @@ export default function Navbar() {
   const handleLogout = async () => {
     await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
     setIsLoggedIn(false);
-    router.push("/");
+    router.push("/"); // redirect after logout
   };
 
   return (
@@ -41,23 +41,27 @@ export default function Navbar() {
 
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center gap-6">
-            <Link href="/events" className="hover:text-green-400">
-              Event List
+            <Link href="/events">
+              <span className="hover:text-green-400">Event List</span>
             </Link>
+
+            {isLoggedIn && (
+              <Link href="/bookings">
+                <span className="hover:text-yellow-400">My Bookings</span>
+              </Link>
+            )}
 
             {!isLoggedIn ? (
               <>
-                <Link
-                  href="/login"
-                  className="bg-green-600 px-4 py-2 rounded hover:bg-green-700"
-                >
-                  Login
+                <Link href="/auth/login">
+                  <span className="bg-green-600 px-4 py-2 rounded hover:bg-green-700">
+                    Login
+                  </span>
                 </Link>
-                <Link
-                  href="/signup"
-                  className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700"
-                >
-                  Signup
+                <Link href="/auth/signup">
+                  <span className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700">
+                    Signup
+                  </span>
                 </Link>
               </>
             ) : (
@@ -82,29 +86,27 @@ export default function Navbar() {
       {/* Mobile Dropdown */}
       {menuOpen && (
         <div className="md:hidden bg-gray-800 px-4 pb-4 space-y-4">
-          <Link
-            href="/events"
-            className="block hover:text-green-400"
-            onClick={() => setMenuOpen(false)}
-          >
-            Event List
+          <Link href="/events" onClick={() => setMenuOpen(false)}>
+            <span className="block hover:text-green-400">Event List</span>
           </Link>
+
+          {isLoggedIn && (
+            <Link href="/bookings" onClick={() => setMenuOpen(false)}>
+              <span className="block hover:text-yellow-400">My Bookings</span>
+            </Link>
+          )}
 
           {!isLoggedIn ? (
             <>
-              <Link
-                href="/login"
-                className="block bg-green-600 px-4 py-2 rounded hover:bg-green-700"
-                onClick={() => setMenuOpen(false)}
-              >
-                Login
+              <Link href="/login" onClick={() => setMenuOpen(false)}>
+                <span className="block bg-green-600 px-4 py-2 rounded hover:bg-green-700">
+                  Login
+                </span>
               </Link>
-              <Link
-                href="/signup"
-                className="block bg-blue-600 px-4 py-2 rounded hover:bg-blue-700"
-                onClick={() => setMenuOpen(false)}
-              >
-                Signup
+              <Link href="/signup" onClick={() => setMenuOpen(false)}>
+                <span className="block bg-blue-600 px-4 py-2 rounded hover:bg-blue-700">
+                  Signup
+                </span>
               </Link>
             </>
           ) : (
