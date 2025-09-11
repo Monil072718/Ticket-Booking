@@ -3,22 +3,32 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Menu, X } from "lucide-react";
+
+type UserType = {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+};
 
 export default function Navbar() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [user, setUser] = useState<UserType | null>(null);
   const [open, setOpen] = useState(false);
   const router = useRouter();
 
-  // ✅ Check login status
+  // ✅ Check login + role
   useEffect(() => {
     const checkAuth = async () => {
       try {
         const res = await fetch("/api/auth/me", { credentials: "include" });
-        setIsLoggedIn(res.ok);
+        if (!res.ok) {
+          setUser(null);
+          return;
+        }
+        const data = await res.json();
+        setUser(data.user); // contains role
       } catch {
-        setIsLoggedIn(false);
+        setUser(null);
       }
     };
     checkAuth();
@@ -27,12 +37,12 @@ export default function Navbar() {
   // ✅ Logout
   const handleLogout = async () => {
     await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
-    setIsLoggedIn(false);
-    router.push("/"); // redirect after logout
+    setUser(null);
+    router.push("/");
   };
 
   return (
-     <nav className="bg-blue-700 text-white shadow-md">
+    <nav className="bg-blue-700 text-white shadow-md">
       <div className="max-w-7xl mx-auto flex justify-between items-center px-4 py-3">
         {/* Logo */}
         <Link href="/" className="text-xl font-bold">🎟 Eventify</Link>
@@ -42,9 +52,27 @@ export default function Navbar() {
           <Link href="/events">Events</Link>
           <Link href="/booking">My Bookings</Link>
           <Link href="/dashboard">Dashboard</Link>
-          <Link href="/auth/login" className="bg-white text-blue-700 px-3 py-1 rounded">Login</Link>
-          <Link href="/auth/register" className="bg-yellow-400 text-black px-3 py-1 rounded">Signup</Link>
-          <Link href="/auth/logout" className="bg-red-500 px-3 py-1 rounded">Logout</Link>
+
+          {/* ✅ Show only if admin */}
+          {user?.role === "admin" && (
+            <Link href="/events/create" className="bg-purple-500 px-3 py-1 rounded">
+              Create Event
+            </Link>
+          )}
+
+          {!user ? (
+            <>
+              <Link href="/auth/login" className="bg-white text-blue-700 px-3 py-1 rounded">Login</Link>
+              <Link href="/auth/register" className="bg-yellow-400 text-black px-3 py-1 rounded">Signup</Link>
+            </>
+          ) : (
+            <button
+              onClick={handleLogout}
+              className="bg-red-500 px-3 py-1 rounded"
+            >
+              Logout
+            </button>
+          )}
         </div>
 
         {/* Mobile Menu Button */}
@@ -59,9 +87,20 @@ export default function Navbar() {
           <Link href="/events" className="block">Events</Link>
           <Link href="/booking" className="block">My Bookings</Link>
           <Link href="/dashboard" className="block">Dashboard</Link>
-          <Link href="/auth/login" className="block">Login</Link>
-          <Link href="/auth/register" className="block">Signup</Link>
-          <Link href="/auth/logout" className="block">Logout</Link>
+
+          {/* ✅ Show only if admin */}
+          {user?.role === "admin" && (
+            <Link href="/events/create" className="block text-purple-200">Create Event</Link>
+          )}
+
+          {!user ? (
+            <>
+              <Link href="/auth/login" className="block">Login</Link>
+              <Link href="/auth/register" className="block">Signup</Link>
+            </>
+          ) : (
+            <button onClick={handleLogout} className="block text-left w-full">Logout</button>
+          )}
         </div>
       )}
     </nav>
