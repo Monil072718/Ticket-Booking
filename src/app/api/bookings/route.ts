@@ -7,16 +7,15 @@ import { requireUser } from "../../../lib/requireAuth";
 // 🎟️ POST /api/bookings → Create booking
 export async function POST(req: NextRequest) {
   try {
-    const user = await requireUser(req); // ✅ auth required
+    const user = await requireUser(req);
     const { eventId, seats, city, state } = await req.json();
 
     if (!eventId || !seats || seats <= 0 || !city || !state) {
-      return NextResponse.json({ error: "Invalid booking data" }, { status: 400 });
+      return NextResponse.json({ error: "Missing booking fields" }, { status: 400 });
     }
 
     await connectDB();
 
-    // ✅ Atomic update: decrement seats only if enough available
     const updatedEvent = await Event.findOneAndUpdate(
       { _id: eventId, availableSeats: { $gte: seats } },
       { $inc: { availableSeats: -seats } },
@@ -27,13 +26,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Not enough seats available" }, { status: 400 });
     }
 
-    // ✅ Create booking tied to logged-in user
     const booking = await Booking.create({
       user: user._id,
       event: eventId,
       seats,
       city,
-      state,   // <-- added here
+      state,
     });
 
     return NextResponse.json({ success: true, booking }, { status: 201 });
@@ -43,19 +41,25 @@ export async function POST(req: NextRequest) {
   }
 }
 
-
 // 🎟️ GET /api/bookings → Get current user's bookings
 export async function GET(req: NextRequest) {
   try {
-    const user = await requireUser(req); // ✅ only current user's bookings
+    const user = await requireUser(req).catch(() => null);
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     await connectDB();
+
     const bookings = await Booking.find({ user: user._id })
-      .populate("event", "title date venue")
-      .sort({ createdAt: -1 });
+      .populate("eventId", "title date venue price") // ✅ match schema
+      .sort({ createdAt: -1 })
+      .lean();
 
     return NextResponse.json({ bookings }, { status: 200 });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("BOOKINGS GET ERR", error);
+    return NextResponse.json({ error: error.message || "Server error" }, { status: 500 });
   }
 }
+

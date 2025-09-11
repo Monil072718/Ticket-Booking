@@ -16,6 +16,8 @@ type EventProps = {
 
 export default function EventDetailClient({ event }: EventProps) {
   const [seats, setSeats] = useState(1);
+  const [city, setCity] = useState("");
+  const [state, setState] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
@@ -24,14 +26,16 @@ export default function EventDetailClient({ event }: EventProps) {
     setSuccess("");
 
     try {
-      // Later this will hit our /api/bookings
       const res = await fetch("/api/bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           eventId: event._id,
-          seats: seats,
+          seats,
+          city,
+          state,
         }),
+        credentials: "include",
       });
 
       const data = await res.json();
@@ -41,17 +45,21 @@ export default function EventDetailClient({ event }: EventProps) {
       }
 
       setSuccess(`🎉 Successfully booked ${seats} seat(s)!`);
+      setCity("");
+      setState("");
+      setSeats(1);
     } catch (err) {
       setError("Something went wrong. Please try again.");
     }
+   
   };
-
   return (
-    <div className="border p-4 rounded mt-6">
+    <div className="border p-4 rounded mt-6 bg-white shadow">
       <h2 className="text-lg font-bold mb-2">Book Your Tickets</h2>
-      <p>Price per ticket: ₹{event.price}</p>
-      <p>Available: {event.availableSeats}</p>
+      <p>💰 Price per ticket: ₹{event.price}</p>
+      <p>🎟️ Available: {event.availableSeats}</p>
 
+      {/* Seats */}
       <div className="flex items-center gap-2 mt-4">
         <label htmlFor="seats">Seats:</label>
         <input
@@ -65,10 +73,36 @@ export default function EventDetailClient({ event }: EventProps) {
         />
       </div>
 
+      {/* City */}
+      <div className="mt-4">
+        <label className="block text-sm font-medium">City</label>
+        <input
+          type="text"
+          value={city}
+          onChange={(e) => setCity(e.target.value)}
+          className="w-full border p-2 rounded"
+          placeholder="Enter your city"
+          required
+        />
+      </div>
+
+      {/* State */}
+      <div className="mt-4">
+        <label className="block text-sm font-medium">State</label>
+        <input
+          type="text"
+          value={state}
+          onChange={(e) => setState(e.target.value)}
+          className="w-full border p-2 rounded"
+          placeholder="Enter your state"
+          required
+        />
+      </div>
+
       <button
         onClick={handleBooking}
         disabled={event.availableSeats === 0}
-        className="mt-4 bg-green-600 text-white px-4 py-2 rounded disabled:opacity-50"
+        className="mt-4 bg-green-600 text-white px-4 py-2 rounded disabled:opacity-50 w-full"
       >
         {event.availableSeats > 0 ? "Book Ticket" : "Sold Out"}
       </button>

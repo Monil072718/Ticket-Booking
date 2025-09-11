@@ -12,7 +12,7 @@ export interface IBooking extends Document {
 const BookingSchema = new Schema<IBooking>(
   {
     userId: { type: String, required: true },
-    eventId: { type: String, required: true },
+    eventId: { type: String, required: true , ref: "Event" },
     seats: { type: Number, required: true, min: 1 },
     city: { type: String, required: true },
     state: { type: String, required: true },

@@ -1,27 +1,22 @@
-// src/lib/requireAuth.ts
-import connectDB from "../lib/db";
+import { NextRequest } from "next/server";
+import jwt from "jsonwebtoken";
 import User from "../models/User";
-import { getTokenFromRequest, verifyToken } from "./auth";
+import connectDB from "./db";
 
-export async function requireUser(req: Request) {
-  const token = getTokenFromRequest(req);
-  if (!token) {
+export async function requireUser(req: NextRequest) {
+  // ✅ Read token directly from request cookies
+  const token = req.cookies.get("token")?.value;
+
+  if (!token) throw new Error("Unauthorized");
+
+  try {
+    const decoded: any = jwt.verify(token, process.env.JWT_SECRET!);
+    await connectDB();
+    const user = await User.findById(decoded.id).select("-password");
+    if (!user) throw new Error("Unauthorized");
+
+    return user;
+  } catch (err) {
     throw new Error("Unauthorized");
   }
-  let decoded: any;
-  try {
-    decoded = verifyToken(token);
-  } catch (err) {
-    throw new Error("Invalid token");
-  }
-  await connectDB();
-  const user = await User.findById(decoded.userId).select("-password");
-  if (!user) throw new Error("Unauthorized");
-  return user;
-}
-
-export async function requireAdmin(req: Request) {
-  const user = await requireUser(req);
-  if ((user as any).role !== "admin") throw new Error("Forbidden");
-  return user;
 }
