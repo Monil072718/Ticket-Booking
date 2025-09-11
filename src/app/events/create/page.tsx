@@ -12,14 +12,13 @@ export default function CreateEventPage() {
     venue: "",
     price: "",
     availableSeats: "",
-    image: ""
+    image: "",
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const router = useRouter();
 
-  // 🔐 Check if user is admin
   useEffect(() => {
     const checkRole = async () => {
       try {
@@ -29,14 +28,12 @@ export default function CreateEventPage() {
           return;
         }
         const data = await res.json();
-        
-        // ✅ FIXED: Allow only admins
         if (data.user.role === "admin") {
           setIsAdmin(true);
         } else {
-          router.push("/"); // redirect non-admins
+          router.push("/");
         }
-      } catch (err) {
+      } catch {
         router.push("/auth/login");
       } finally {
         setLoading(false);
@@ -70,7 +67,7 @@ export default function CreateEventPage() {
       }
 
       router.push("/events");
-    } catch (err) {
+    } catch {
       setError("Something went wrong");
     }
   };
@@ -79,19 +76,23 @@ export default function CreateEventPage() {
   if (!isAdmin) return null;
 
   return (
-    <main className="max-w-md mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-4">Create Event</h1>
+    <main className="max-w-lg mx-auto p-6 bg-white rounded shadow">
+      <h1 className="text-2xl font-bold mb-4 text-center">📝 Create Event</h1>
       {error && <p className="text-red-500">{error}</p>}
+
       <form onSubmit={handleSubmit} className="space-y-4">
-        <input name="title" placeholder="Title" onChange={handleChange} className="w-full border p-2" />
-        <input name="slug" placeholder="Slug (unique)" onChange={handleChange} className="w-full border p-2" />
-        <textarea name="description" placeholder="Description" onChange={handleChange} className="w-full border p-2" />
-        <input type="datetime-local" name="date" onChange={handleChange} className="w-full border p-2" />
-        <input name="venue" placeholder="Venue" onChange={handleChange} className="w-full border p-2" />
-        <input type="number" name="price" placeholder="Price" onChange={handleChange} className="w-full border p-2" />
-        <input type="number" name="availableSeats" placeholder="Available Seats" onChange={handleChange} className="w-full border p-2" />
-        <input name="image" placeholder="Image URL" onChange={handleChange} className="w-full border p-2" />
-        <button type="submit" className="w-full bg-blue-600 text-white p-2 rounded">Create Event</button>
+        <input name="title" placeholder="Title" onChange={handleChange} className="w-full border p-2 rounded" required />
+        <input name="slug" placeholder="Slug (unique)" onChange={handleChange} className="w-full border p-2 rounded" required />
+        <textarea name="description" placeholder="Description" onChange={handleChange} className="w-full border p-2 rounded" />
+        <input type="datetime-local" name="date" onChange={handleChange} className="w-full border p-2 rounded" required />
+        <input name="venue" placeholder="Venue" onChange={handleChange} className="w-full border p-2 rounded" required />
+        <input type="number" name="price" placeholder="Price" onChange={handleChange} className="w-full border p-2 rounded" required />
+        <input type="number" name="availableSeats" placeholder="Available Seats" onChange={handleChange} className="w-full border p-2 rounded" required />
+        <input name="image" placeholder="Image URL" onChange={handleChange} className="w-full border p-2 rounded" />
+
+        <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition">
+          Create Event
+        </button>
       </form>
     </main>
   );

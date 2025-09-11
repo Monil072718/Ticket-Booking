@@ -8,6 +8,7 @@ import { Menu, X } from "lucide-react";
 export default function Navbar() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [open, setOpen] = useState(false);
   const router = useRouter();
 
   // ✅ Check login status
@@ -31,95 +32,36 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="bg-gray-900 text-white shadow-md">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <Link href="/" className="text-2xl font-bold">
-            🎟️ Eventify
-          </Link>
+     <nav className="bg-blue-700 text-white shadow-md">
+      <div className="max-w-7xl mx-auto flex justify-between items-center px-4 py-3">
+        {/* Logo */}
+        <Link href="/" className="text-xl font-bold">🎟 Eventify</Link>
 
-          {/* Desktop Menu */}
-          <div className="hidden md:flex items-center gap-6">
-            <Link href="/events">
-              <span className="hover:text-green-400">Event List</span>
-            </Link>
-
-            {isLoggedIn && (
-              <Link href="/bookings">
-                <span className="hover:text-yellow-400">My Bookings</span>
-              </Link>
-            )}
-
-            {!isLoggedIn ? (
-              <>
-                <Link href="/auth/login">
-                  <span className="bg-green-600 px-4 py-2 rounded hover:bg-green-700">
-                    Login
-                  </span>
-                </Link>
-                <Link href="/auth/signup">
-                  <span className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700">
-                    Signup
-                  </span>
-                </Link>
-              </>
-            ) : (
-              <button
-                onClick={handleLogout}
-                className="bg-red-600 px-4 py-2 rounded hover:bg-red-700"
-              >
-                Logout
-              </button>
-            )}
-          </div>
-
-          {/* Mobile Menu Button */}
-          <div className="md:hidden flex items-center">
-            <button onClick={() => setMenuOpen(!menuOpen)}>
-              {menuOpen ? <X size={28} /> : <Menu size={28} />}
-            </button>
-          </div>
+        {/* Desktop Menu */}
+        <div className="hidden md:flex gap-6 items-center">
+          <Link href="/events">Events</Link>
+          <Link href="/booking">My Bookings</Link>
+          <Link href="/dashboard">Dashboard</Link>
+          <Link href="/auth/login" className="bg-white text-blue-700 px-3 py-1 rounded">Login</Link>
+          <Link href="/auth/register" className="bg-yellow-400 text-black px-3 py-1 rounded">Signup</Link>
+          <Link href="/auth/logout" className="bg-red-500 px-3 py-1 rounded">Logout</Link>
         </div>
+
+        {/* Mobile Menu Button */}
+        <button className="md:hidden" onClick={() => setOpen(!open)}>
+          ☰
+        </button>
       </div>
 
       {/* Mobile Dropdown */}
-      {menuOpen && (
-        <div className="md:hidden bg-gray-800 px-4 pb-4 space-y-4">
-          <Link href="/events" onClick={() => setMenuOpen(false)}>
-            <span className="block hover:text-green-400">Event List</span>
-          </Link>
-
-          {isLoggedIn && (
-            <Link href="/bookings" onClick={() => setMenuOpen(false)}>
-              <span className="block hover:text-yellow-400">My Bookings</span>
-            </Link>
-          )}
-
-          {!isLoggedIn ? (
-            <>
-              <Link href="/login" onClick={() => setMenuOpen(false)}>
-                <span className="block bg-green-600 px-4 py-2 rounded hover:bg-green-700">
-                  Login
-                </span>
-              </Link>
-              <Link href="/signup" onClick={() => setMenuOpen(false)}>
-                <span className="block bg-blue-600 px-4 py-2 rounded hover:bg-blue-700">
-                  Signup
-                </span>
-              </Link>
-            </>
-          ) : (
-            <button
-              onClick={() => {
-                handleLogout();
-                setMenuOpen(false);
-              }}
-              className="w-full text-left bg-red-600 px-4 py-2 rounded hover:bg-red-700"
-            >
-              Logout
-            </button>
-          )}
+      {open && (
+        <div className="md:hidden bg-blue-600 px-4 py-3 space-y-2">
+          <Link href="/events" className="block">Events</Link>
+          <Link href="/booking" className="block">My Bookings</Link>
+          <Link href="/dashboard" className="block">Dashboard</Link>
+          <Link href="/auth/login" className="block">Login</Link>
+          <Link href="/auth/register" className="block">Signup</Link>
+          <Link href="/auth/logout" className="block">Logout</Link>
         </div>
       )}
     </nav>
