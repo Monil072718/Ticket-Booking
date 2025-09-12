@@ -1,3 +1,4 @@
+// src/components/Navbar.tsx
 "use client";
 
 import Link from "next/link";
@@ -50,8 +51,8 @@ export default function Navbar() {
         {/* Desktop Menu */}
         <div className="hidden md:flex gap-6 items-center">
           <Link href="/events">Events</Link>
-          <Link href="/booking">My Bookings</Link>
-          <Link href="/dashboard">Dashboard</Link>
+          {user && <Link href="/booking">My Bookings</Link>}
+          {user && <Link href="/dashboard">Dashboard</Link>}
 
           {/* ✅ Show only if admin */}
           {user?.role === "admin" && (
@@ -62,8 +63,12 @@ export default function Navbar() {
 
           {!user ? (
             <>
-              <Link href="/auth/login" className="bg-white text-blue-700 px-3 py-1 rounded">Login</Link>
-              <Link href="/auth/register" className="bg-yellow-400 text-black px-3 py-1 rounded">Signup</Link>
+              <Link href="/auth/login" className="bg-white text-blue-700 px-3 py-1 rounded">
+                Login
+              </Link>
+              <Link href="/auth/register" className="bg-yellow-400 text-black px-3 py-1 rounded">
+                Signup
+              </Link>
             </>
           ) : (
             <button
@@ -85,12 +90,14 @@ export default function Navbar() {
       {open && (
         <div className="md:hidden bg-blue-600 px-4 py-3 space-y-2">
           <Link href="/events" className="block">Events</Link>
-          <Link href="/booking" className="block">My Bookings</Link>
-          <Link href="/dashboard" className="block">Dashboard</Link>
+          {user && <Link href="/booking" className="block">My Bookings</Link>}
+          {user && <Link href="/dashboard" className="block">Dashboard</Link>}
 
           {/* ✅ Show only if admin */}
           {user?.role === "admin" && (
-            <Link href="/events/create" className="block text-purple-200">Create Event</Link>
+            <Link href="/events/create" className="block text-purple-200">
+              Create Event
+            </Link>
           )}
 
           {!user ? (
@@ -99,7 +106,9 @@ export default function Navbar() {
               <Link href="/auth/register" className="block">Signup</Link>
             </>
           ) : (
-            <button onClick={handleLogout} className="block text-left w-full">Logout</button>
+            <button onClick={handleLogout} className="block text-left w-full">
+              Logout
+            </button>
           )}
         </div>
       )}

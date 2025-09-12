@@ -59,12 +59,6 @@ export default function DashboardPage() {
         >
           My Bookings
         </button>
-        <button
-          onClick={() => router.push("/auth/logout")}
-          className="bg-red-600 text-white p-4 rounded shadow"
-        >
-          Logout
-        </button>
       </div>
 
       <h2 className="text-xl font-semibold mt-8 mb-4">Upcoming Events</h2>
