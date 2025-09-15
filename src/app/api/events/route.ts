@@ -11,6 +11,8 @@ export async function GET() {
     return new Response(JSON.stringify({ error: err.message }), { status: 500 });
   }
 }
+ 
+
 
 export async function POST(req: Request) {
   try {
