@@ -23,7 +23,7 @@ export default function DashboardPage() {
         const data = await res.json();
         setUser(data.user);
       } else {
-        router.push("/auth/login"); // redirect if not logged in
+        router.push("/auth/login");
       }
     };
 
@@ -31,7 +31,9 @@ export default function DashboardPage() {
       const res = await fetch("/api/events");
       if (res.ok) {
         const data = await res.json();
-        setEvents(data);
+        setEvents(data.events || []); // ✅ FIX
+      } else {
+        setEvents([]);
       }
     };
 
@@ -44,7 +46,9 @@ export default function DashboardPage() {
 
   return (
     <main className="max-w-4xl mx-auto p-6">
-      <h1 className="text-3xl font-bold">Welcome, {user?.name || "Guest"} 🎉</h1>
+      <h1 className="text-3xl font-bold">
+        Welcome, {user?.name || "Guest"} 🎉
+      </h1>
 
       <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
         <button
