@@ -1,29 +1,79 @@
-import connectDB from "../../../lib/db";
-import Event from "../../../models/Event";
-import { requireAdmin } from "../../../lib/requireAuth";
+import { NextRequest, NextResponse } from "next/server";
+import connectDB from "@/lib/db";
+import Event from "@/models/Event";
+import { requireAdmin } from "@/lib/requireAuth";
 
+// ✅ Get all events
 export async function GET() {
   try {
     await connectDB();
     const events = await Event.find().sort({ date: 1 }).lean();
-    return new Response(JSON.stringify(events), { status: 200 });
+    return NextResponse.json({ success: true, events }, { status: 200 });
   } catch (err: any) {
-    return new Response(JSON.stringify({ error: err.message }), { status: 500 });
+    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }
 }
- 
 
-
-export async function POST(req: Request) {
+// ✅ Create new event (Admin only)
+export async function POST(req: NextRequest) {
   try {
-    await requireAdmin(req); // only admin can create
+    await requireAdmin(req); // 🔒 Ensure only admin can create
     await connectDB();
 
     const body = await req.json();
-    const event = await Event.create(body);
+    const newEvent = await Event.create(body);
 
-    return new Response(JSON.stringify(event), { status: 201 });
+    return NextResponse.json({ success: true, event: newEvent }, { status: 201 });
   } catch (err: any) {
-    return new Response(JSON.stringify({ error: err.message }), { status: 500 });
+    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+  }
+}
+
+// ✅ Update event (Admin only)
+export async function PUT(req: NextRequest) {
+  try {
+    await requireAdmin(req); // 🔒 Ensure only admin can update
+    await connectDB();
+
+    const { id, ...updateData } = await req.json();
+
+    if (!id) {
+      return NextResponse.json({ success: false, error: "Event ID is required" }, { status: 400 });
+    }
+
+    const updatedEvent = await Event.findByIdAndUpdate(id, updateData, { new: true });
+
+    if (!updatedEvent) {
+      return NextResponse.json({ success: false, error: "Event not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({ success: true, event: updatedEvent }, { status: 200 });
+  } catch (err: any) {
+    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+  }
+}
+
+// ✅ Delete event (Admin only)
+export async function DELETE(req: NextRequest) {
+  try {
+    await requireAdmin(req); // 🔒 Ensure only admin can delete
+    await connectDB();
+
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id");
+
+    if (!id) {
+      return NextResponse.json({ success: false, error: "Event ID is required" }, { status: 400 });
+    }
+
+    const deletedEvent = await Event.findByIdAndDelete(id);
+
+    if (!deletedEvent) {
+      return NextResponse.json({ success: false, error: "Event not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({ success: true, message: "Event deleted successfully" }, { status: 200 });
+  } catch (err: any) {
+    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }
 }
