@@ -15,15 +15,13 @@ export async function GET() {
 }
 
 // ✅ Create new event (Admin only)
-export async function POST(req: NextRequest) {
+export async function POST(req: Request) {
   try {
-    await requireAdmin(req); // 🔒 Ensure only admin can create
+    await requireAdmin(req as any);
     await connectDB();
-
     const body = await req.json();
-    const newEvent = await Event.create(body);
-
-    return NextResponse.json({ success: true, event: newEvent }, { status: 201 });
+    const event = await Event.create(body);
+    return NextResponse.json({ success: true, event }, { status: 201 });
   } catch (err: any) {
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }
@@ -54,25 +52,19 @@ export async function PUT(req: NextRequest) {
 }
 
 // ✅ Delete event (Admin only)
-export async function DELETE(req: NextRequest) {
+export async function DELETE(req: Request) {
   try {
-    await requireAdmin(req); // 🔒 Ensure only admin can delete
+    await requireAdmin(req as any);
     await connectDB();
 
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
-
     if (!id) {
-      return NextResponse.json({ success: false, error: "Event ID is required" }, { status: 400 });
+      return NextResponse.json({ success: false, error: "Event ID required" }, { status: 400 });
     }
 
-    const deletedEvent = await Event.findByIdAndDelete(id);
-
-    if (!deletedEvent) {
-      return NextResponse.json({ success: false, error: "Event not found" }, { status: 404 });
-    }
-
-    return NextResponse.json({ success: true, message: "Event deleted successfully" }, { status: 200 });
+    await Event.findByIdAndDelete(id);
+    return NextResponse.json({ success: true, message: "Event deleted" }, { status: 200 });
   } catch (err: any) {
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }

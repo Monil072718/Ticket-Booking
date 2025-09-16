@@ -18,13 +18,12 @@ export default function AdminDashboard() {
   const [error, setError] = useState("");
   const router = useRouter();
 
-  // ✅ Fetch events
   useEffect(() => {
     const fetchEvents = async () => {
       try {
         const res = await fetch("/api/events", { credentials: "include" });
         const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Failed to fetch events");
+        if (!res.ok || !data.success) throw new Error(data.error || "Failed to fetch events");
         setEvents(data.events);
       } catch (err: any) {
         setError(err.message);
@@ -35,17 +34,15 @@ export default function AdminDashboard() {
     fetchEvents();
   }, []);
 
-  // ✅ Delete event
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this event?")) return;
-
     try {
       const res = await fetch(`/api/events?id=${id}`, {
         method: "DELETE",
         credentials: "include",
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Delete failed");
+      if (!res.ok || !data.success) throw new Error(data.error || "Delete failed");
       setEvents(events.filter((ev) => ev._id !== id));
       alert("Event deleted successfully");
     } catch (err: any) {
@@ -53,7 +50,6 @@ export default function AdminDashboard() {
     }
   };
 
-  // ✅ Edit event
   const handleEdit = (id: string) => {
     router.push(`/admin/edit/${id}`);
   };
@@ -84,23 +80,15 @@ export default function AdminDashboard() {
               {events.map((ev) => (
                 <tr key={ev._id} className="text-center">
                   <td className="border px-4 py-2">{ev.title}</td>
-                  <td className="border px-4 py-2">
-                    {new Date(ev.date).toLocaleDateString()}
-                  </td>
+                  <td className="border px-4 py-2">{new Date(ev.date).toLocaleDateString()}</td>
                   <td className="border px-4 py-2">{ev.venue}</td>
                   <td className="border px-4 py-2">₹{ev.price}</td>
                   <td className="border px-4 py-2">{ev.availableSeats}</td>
                   <td className="border px-4 py-2 space-x-2">
-                    <button
-                      onClick={() => handleEdit(ev._id)}
-                      className="bg-yellow-400 text-black px-3 py-1 rounded"
-                    >
+                    <button onClick={() => handleEdit(ev._id)} className="bg-yellow-400 text-black px-3 py-1 rounded">
                       Edit
                     </button>
-                    <button
-                      onClick={() => handleDelete(ev._id)}
-                      className="bg-red-500 text-white px-3 py-1 rounded"
-                    >
+                    <button onClick={() => handleDelete(ev._id)} className="bg-red-500 text-white px-3 py-1 rounded">
                       Delete
                     </button>
                   </td>
