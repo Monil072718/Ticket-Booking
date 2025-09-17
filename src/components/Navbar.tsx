@@ -18,9 +18,14 @@ export default function Navbar() {
           setUser(data.user);
 
           // show success modal only once
-          if (!user) {
-            setShowModal(true);
-          }
+          useEffect(() => {
+            // ✅ Check sessionStorage flag ONCE
+            if (sessionStorage.getItem("showLoginModal") === "true") {
+              setShowModal(true);
+              sessionStorage.removeItem("showLoginModal"); // clear so it doesn’t show again
+            }
+          }, []);
+
         }
       } catch {
         console.log("Not logged in");
@@ -108,7 +113,7 @@ export default function Navbar() {
       <LoginSuccessModal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
-        userName={user?.name || ""}
+        userName={"User"} // pass actual user name
       />
     </>
   );
