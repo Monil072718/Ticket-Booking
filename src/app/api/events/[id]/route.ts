@@ -1,40 +1,37 @@
-import connectDB from "../../../../lib/db";
-import Event from "../../../../models/Event";
-import { requireAdmin } from "../../../../lib/requireAuth";
+import { NextResponse } from "next/server";
+import connectDB from "@/lib/db";
+import Event from "@/models/Event";
+import { requireAdmin } from "@/lib/requireAuth";
 
-type Params = { params: { id: string } };
-
-export async function GET(req: Request, { params }: Params) {
-  try {
-    await connectDB();
-    const ev = await Event.findById(params.id).lean();
-    if (!ev) return new Response(JSON.stringify({ error: "Not found" }), { status: 404 });
-    return new Response(JSON.stringify(ev), { status: 200 });
-  } catch (err: any) {
-    return new Response(JSON.stringify({ error: err.message }), { status: 500 });
-  }
+// GET event by ID
+export async function GET(req: Request, { params }: { params: { id: string } }) {
+  await connectDB();
+  const event = await Event.findById(params.id).lean();
+  if (!event) return NextResponse.json({ error: "Event not found" }, { status: 404 });
+  return NextResponse.json(event);
 }
 
-export async function PUT(req: Request, { params }: Params) {
+// UPDATE event by ID
+export async function PUT(req: Request, { params }: { params: { id: string } }) {
   try {
-    await requireAdmin(req);
+    await requireAdmin(req as any);
     await connectDB();
     const body = await req.json();
-    const updated = await Event.findByIdAndUpdate(params.id, body, { new: true }).lean();
-    if (!updated) return new Response(JSON.stringify({ error: "Not found" }), { status: 404 });
-    return new Response(JSON.stringify(updated), { status: 200 });
+    const updated = await Event.findByIdAndUpdate(params.id, body, { new: true });
+    return NextResponse.json(updated);
   } catch (err: any) {
-    return new Response(JSON.stringify({ error: err.message }), { status: 500 });
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
 
-export async function DELETE(req: Request, { params }: Params) {
+// DELETE event by ID
+export async function DELETE(req: Request, { params }: { params: { id: string } }) {
   try {
-    await requireAdmin(req);
+    await requireAdmin(req as any);
     await connectDB();
     await Event.findByIdAndDelete(params.id);
-    return new Response(JSON.stringify({ ok: true }), { status: 200 });
+    return NextResponse.json({ success: true });
   } catch (err: any) {
-    return new Response(JSON.stringify({ error: err.message }), { status: 500 });
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
